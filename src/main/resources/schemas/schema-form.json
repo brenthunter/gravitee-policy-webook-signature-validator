@@ -1,0 +1,65 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+        "sourceSignatureHeader": {
+            "title": "Signature",
+            "description": "Specify the provided Signature (typically from a http header, and in Base64) to validate against (supports EL)",
+            "type": "string",
+            "default": "{#request.headers['X-HMAC-Signature'][0]}"
+        },
+        "schemeType": {
+            "type": "object",
+            "oneOf": [
+                {
+                    "title": "Request Content (only)",
+                    "description": "Validate the signature using only the request content",
+                    "properties": {
+                        "enabled": {
+                            "const": false
+                        }
+                    }
+                },
+                {
+                    "title": "Request Content + Custom Header",
+                    "description": "Validate the signature using both the request content, as well as additional custom header(s)",
+                    "properties": {
+                        "enabled": {
+                            "const": true
+                        },
+                        "headers": {
+                            "type": "array",
+                            "title": "HTTP Headers",
+                            "description": "List of headers to use in Webhook signature validation",
+                            "items": {
+                                "title": "HTTP Header Name",
+                                "type": "string",
+                                "default": "{#request.headers['myHeaderName'][0]}"
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        "secret": {
+            "title": "Secret",
+            "description": "The secret key used to sign (supports EL)",
+            "type": "string"
+        },
+        "algorithm": {
+            "title": "HMAC Algorithm Type",
+            "description": "Specify the expected HMAC algorithm",
+            "type": "string",
+            "default": "HmacSHA256",
+            "enum": ["HmacSHA1", "HmacSHA256", "HmacSHA384", "HmacSHA512"]
+        },
+        "clockSkew": {
+            "title": "Clock Skew",
+            "default": 30,
+            "description": "Clock Skew (in seconds) to prevent replay attacks",
+            "type": "integer"
+        }
+    },
+    "required": ["schemeType", "secret", "algorithm"]
+}
