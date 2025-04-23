@@ -31,37 +31,32 @@ The "Signature" is based on the model that the sender must authenticate itself w
 == Configuration
 
 |===
-|Property |Required |Description |Default |Example
+|Property |Required |Description |Default
 
 .^|sourceSignatureHeader
 ^.^|X
 |Specify the location to find the Signature (typically from a HTTP header, and in Base64) (Supports EL)
-^.^| -
 ^.^| {#request.headers['X-HMAC-Signature'][0]}
 
 .^|schemeType
 ^.^|X
 |By default, this policy will validate the signature only against the HTTP body.  Set this boolean to 'true' to include additional headers (as well as the HTTP body) in the signature validation.
 ^.^| false
-^.^| -
 
 .^|headers [Array]
 ^.^|-
 |If the signature has been generated with additional headers (e.g. a timestamp), you will need to include the names of those additional header(s).
-^.^| false
-^.^| -
+^.^| 
 
 .^|secret
 ^.^|X
 |The secret key used to generate and verify the signature (Supports EL).
-^.^| -
-^.^| passphrase
+^.^| 
 
 .^|algorithms
-^.^|-
-|A list of supported HMAC digest algorithms.
-^.^| -
-^.^| -
+^.^|X
+|Specify the expected HMAC algorithm (e.g.: HmacSHA1, HmacSHA256, HmacSHA384, or HmacSHA512).
+^.^| HmacSHA256
 
 |===
 
