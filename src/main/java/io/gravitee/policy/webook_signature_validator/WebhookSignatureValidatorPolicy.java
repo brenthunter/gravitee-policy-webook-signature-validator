@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2015 The Gravitee team (http://gravitee.io)
+ * Copyright (C) 2025 The Gravitee team (http://gravitee.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,8 +44,6 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import lombok.extern.slf4j.Slf4j;
-import org.tomitribe.auth.signatures.Signature;
-import org.tomitribe.auth.signatures.Signer;
 
 /**
  * @author Brent HUNTER (brent.hunter at graviteesource.com)
@@ -59,8 +57,6 @@ public class WebhookSignatureValidatorPolicy {
     private static final String WEBHOOK_SIGNATURE_NOT_BASE64 = "WEBHOOK_SIGNATURE_NOT_BASE64";
     private static final String WEBHOOK_ADDITIONAL_HEADERS_NOT_VALID = "WEBHOOK_ADDITIONAL_HEADERS_NOT_VALID";
 
-    static final String WEBHOOK_HEADER_SIGNATURE = "X-Shopify-Webhook-HMAC";
-
     /**
      * Policy configuration
      */
@@ -72,10 +68,9 @@ public class WebhookSignatureValidatorPolicy {
 
     @OnRequestContent
     public ReadWriteStream<Buffer> onRequestContent(Request request, Response response, ExecutionContext context, PolicyChain chain) {
-        // Extract the signature according to the scheme
-        log.info("DEBUG: Starting WebhookSignatureValidatorPolicy...");
+        log.info("Executing WebhookSignatureValidatorPolicy...");
 
-        String secret2 = context.getTemplateEngine().getValue(configuration.getSecret(), String.class);
+        String secret = context.getTemplateEngine().getValue(configuration.getSecret(), String.class);
         String algorithm = configuration.getAlgorithm();
 
         return new BufferedReadWriteStream() {
@@ -92,9 +87,12 @@ public class WebhookSignatureValidatorPolicy {
                 String sourceSigHeader = null;
                 List<String> addedHeaders = null;
 
+                // Get HTTP body payload
+                String data = buffer.toString();
+
                 try {
                     sourceSigHeader = context.getTemplateEngine().getValue(configuration.getSourceSignatureHeader(), String.class);
-                    log.info("DEBUG: Supplied HMAC Signature: {}", sourceSigHeader); // "He+KRJq..."
+                    log.debug("Supplied HMAC Signature: {}", sourceSigHeader);
                     if (sourceSigHeader == "" || sourceSigHeader.isBlank() || sourceSigHeader == null) {
                         chain.failWith(PolicyResult.failure(WEBHOOK_SIGNATURE_NOT_FOUND, 401, "Webhook Signature Not Found"));
                         return;
@@ -104,14 +102,21 @@ public class WebhookSignatureValidatorPolicy {
                     return;
                 }
 
-                log.info("DEBUG: Signature validation requires additional headers?: {}", configuration.getSchemeType().isEnabled()); // true|false
+                log.debug(
+                    "Config> Does the Signature validation require additional headers?: {}",
+                    configuration.getSchemeType().isEnabled()
+                ); // true|false
                 if (configuration.getSchemeType().isEnabled()) {
                     addedHeaders = new ArrayList<>(configuration.getSchemeType().getHeaders());
 
                     if (addedHeaders.size() > 0) {
                         int i = 0;
                         while (i < addedHeaders.size()) {
-                            log.debug("DEBUG: Header '{}' = '{}'", addedHeaders.get(i), request.headers().get(addedHeaders.get(i)));
+                            log.debug(
+                                "Config> Additional header(s): {} = {}",
+                                addedHeaders.get(i),
+                                request.headers().get(addedHeaders.get(i))
+                            );
                             if (request.headers().get(addedHeaders.get(i)) == null) {
                                 chain.failWith(
                                     PolicyResult.failure(
@@ -136,35 +141,37 @@ public class WebhookSignatureValidatorPolicy {
                     }
                 }
 
-                log.info("DEBUG: Secret: {}", secret2); // "mySecret"
-                log.info("DEBUG: Algorithm: {}", algorithm); // "Hmac512"
-                log.info("DEBUG: Request Body: {}", buffer.toString());
+                log.debug("Config> Secret: {}", secret);
+                log.debug("Config> Algorithm: {}", algorithm);
+                log.debug("Config> Request Body: {}", buffer.toString());
 
-                log.info("DEBUG: -> Configuration retrieval completed.");
-
-                // Get request payload
-                String data = buffer.toString();
-
-                // Prepare data (add additional headers to payload if needed)
+                // Optionally, prefix any additional headers to HTTP body
                 if (configuration.getSchemeType().isEnabled()) {
                     int i = 0;
                     String tmpData = "";
                     while (i < addedHeaders.size()) {
-                        log.info("DEBUG: Adding '{}' to data...", request.headers().get(addedHeaders.get(i)));
+                        log.debug(
+                            "Prefixing HTTP header '{}' ({}) to HTTP body...",
+                            addedHeaders.get(i),
+                            request.headers().get(addedHeaders.get(i))
+                        );
                         tmpData += request.headers().get(addedHeaders.get(i));
                         i++;
                     }
                     data = tmpData + data;
                 }
-                log.info("DEBUG: (final) data (for signature creation) '{}'", data);
+
+                log.debug("Config> Configuration retrieval completed.");
+
+                log.debug("Final data (for signature creation): {}", data);
 
                 // Generate and Validate HMAC Signature...
-                if (!validateHmacSignature(data, sourceSigHeader, secret2, algorithm)) {
-                    log.error("DEBUG_FINAL: Signature is NOT valid!");
+                if (!validateHmacSignature(data, sourceSigHeader, secret, algorithm)) {
+                    log.error("Signature is NOT valid!");
                     chain.failWith(PolicyResult.failure(WEBHOOK_SIGNATURE_INVALID_SIGNATURE, 401, "Invalid Webhook Signature"));
                     return;
                 }
-                log.info("DEBUG_FINAL: Signature is valid.");
+                log.debug("Signature is valid.");
                 chain.doNext(request, response);
             }
         };
@@ -183,12 +190,12 @@ public class WebhookSignatureValidatorPolicy {
             // Generate the HMAC hash of the data
             byte[] hmacHash = mac.doFinal(data.getBytes("UTF-8"));
 
-            log.info("DEBUG: Generated HMAC signature: {}", Base64.getEncoder().encodeToString(hmacHash));
+            log.debug("Generated HMAC signature: {}", Base64.getEncoder().encodeToString(hmacHash));
 
             // Return the Base64 encoded HMAC signature
             return Base64.getEncoder().encodeToString(hmacHash);
         } catch (Exception ex) {
-            log.error("DEBUG: Exception - Error generating HMAC signature!");
+            log.error("Exception occurred while generating HMAC signature!");
             log.error(ex.getMessage());
             //request.metrics().setMessage(ex.getMessage());
             return null;
@@ -197,7 +204,6 @@ public class WebhookSignatureValidatorPolicy {
 
     // Method to validate the HMAC signature
     private boolean validateHmacSignature(String data, String providedSignature, String secretKey, String algorithm) {
-        log.info("DEBUG: Validating HMAC signature...");
         // Generate the HMAC signature based on the data and the secret key
         String generatedSignature = generateHmacSignature(data, secretKey, algorithm);
 

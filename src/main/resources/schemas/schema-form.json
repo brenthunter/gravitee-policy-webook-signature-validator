@@ -5,16 +5,18 @@
     "properties": {
         "sourceSignatureHeader": {
             "title": "Signature",
-            "description": "Specify the provided Signature (typically from a http header, and in Base64) to validate against (supports EL)",
+            "description": "Specify the location to find the Signature (typically from a HTTP header, and in Base64) (Supports EL)",
             "type": "string",
             "default": "{#request.headers['X-HMAC-Signature'][0]}"
         },
         "schemeType": {
+            "title": "Validation Type",
+            "description": "By default, this policy will validate the signature only against the HTTP body.  Change this option if you need to include additional headers (as well as the HTTP body) in the signature validation.",
             "type": "object",
             "oneOf": [
                 {
-                    "title": "Request Content (only)",
-                    "description": "Validate the signature using only the request content",
+                    "title": "HTTP Body (only)",
+                    "description": "By default, this policy will validate the signature only against the HTTP body.",
                     "properties": {
                         "enabled": {
                             "const": false
@@ -22,8 +24,8 @@
                     }
                 },
                 {
-                    "title": "Request Content + Custom Header",
-                    "description": "Validate the signature using both the request content, as well as additional custom header(s)",
+                    "title": "HTTP Body + Header(s)",
+                    "description": "Validate the signature using both the HTTP body, pre-fixed with additional header(s)",
                     "properties": {
                         "enabled": {
                             "const": true
@@ -35,7 +37,7 @@
                             "items": {
                                 "title": "HTTP Header Name",
                                 "type": "string",
-                                "default": "{#request.headers['myHeaderName'][0]}"
+                                "default": "X-MyHeaderName"
                             }
                         }
                     }
@@ -53,12 +55,6 @@
             "type": "string",
             "default": "HmacSHA256",
             "enum": ["HmacSHA1", "HmacSHA256", "HmacSHA384", "HmacSHA512"]
-        },
-        "clockSkew": {
-            "title": "Clock Skew",
-            "default": 30,
-            "description": "Clock Skew (in seconds) to prevent replay attacks",
-            "type": "integer"
         }
     },
     "required": ["schemeType", "secret", "algorithm"]

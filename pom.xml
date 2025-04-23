@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (C) 2015 The Gravitee team (http://gravitee.io)
+    Copyright (C) 2025 The Gravitee team (http://gravitee.io)
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -26,36 +26,35 @@
     <version>1.0.0</version>
 
     <name>Gravitee.io APIM - Policy - Webhook Signature Validator</name>
-    <description>Validates a Webhook (HMAC) signature against the request body (and optionally a custom header, e.g. timestamp header) to ensure its identity</description>
+    <description>Validates a Webhook (HMAC) signature against the HTTP body, and optionally additional custom header(s), e.g. timestamp header) to ensure its identity</description>
 
     <parent>
         <groupId>io.gravitee</groupId>
         <artifactId>gravitee-parent</artifactId>
-        <version>22.0.27</version>
+        <version>22.2.5</version>
     </parent>
 
     <properties>
-        <gravitee-bom.version>6.0.47</gravitee-bom.version>
-        <gravitee-gateway.version>3.6.3</gravitee-gateway.version>
-        <gravitee-gateway-api.version>3.5.0</gravitee-gateway-api.version>
-        <gravitee-policy-api.version>1.11.0</gravitee-policy-api.version>
-        <gravitee-common.version>2.3.0</gravitee-common.version>
-        <tomitribe-http-signatures.version>1.7</tomitribe-http-signatures.version>
+    
+        <!-- Gravitee dependencies for APIM -->
+        <gravitee-apim.version>4.6.3</gravitee-apim.version>
         <!-- Maven plugins -->
-        <properties-maven-plugin.version>1.1.0</properties-maven-plugin.version>
         <maven-plugin-assembly.version>3.7.1</maven-plugin-assembly.version>
+        <maven-plugin-properties.version>1.2.1</maven-plugin-properties.version>
         <!-- Property used by the publication job in CI-->
-        <publish-folder-path>graviteeio-apim/plugins/policies</publish-folder-path>
+        <publish-folder-path>graviteeio-ee/apim/plugins/policies</publish-folder-path>
+
+		<gravitee-gateway.version>3.6.3</gravitee-gateway.version>
+
     </properties>
 
     <dependencyManagement>
         <dependencies>
-            <!-- Gravitee dependencies -->
             <!-- Import bom to properly inherit all dependencies -->
             <dependency>
-                <groupId>io.gravitee</groupId>
-                <artifactId>gravitee-bom</artifactId>
-                <version>${gravitee-bom.version}</version>
+                <groupId>io.gravitee.apim</groupId>
+                <artifactId>gravitee-apim-bom</artifactId>
+                <version>${gravitee-apim.version}</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -67,51 +66,20 @@
         <dependency>
             <groupId>io.gravitee.gateway</groupId>
             <artifactId>gravitee-gateway-api</artifactId>
-            <version>${gravitee-gateway-api.version}</version>
             <scope>provided</scope>
         </dependency>
-
         <dependency>
             <groupId>io.gravitee.policy</groupId>
             <artifactId>gravitee-policy-api</artifactId>
-            <version>${gravitee-policy-api.version}</version>
             <scope>provided</scope>
         </dependency>
-
-        <dependency>
-            <groupId>io.gravitee.common</groupId>
-            <artifactId>gravitee-common</artifactId>
-            <version>${gravitee-common.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        
-        <dependency>
+          <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>
-
-        <!-- Vert.x -->
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-core</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <!-- Jackson dependencies -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
+              
         <!-- Logging -->
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -121,16 +89,38 @@
         
         <!-- Test scope -->
         <dependency>
+            <groupId>io.gravitee.gateway</groupId>
+            <artifactId>gravitee-gateway-buffer</artifactId>
+            <version>${gravitee-gateway.version}</version>
+            <scope>test</scope>
+        </dependency>
+        
+         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
-
+       <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>        
+        
     </dependencies>
 
     <build>
@@ -141,10 +131,24 @@
             </resource>
         </resources>
         <plugins>
-            <plugin>
+			<plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>${license-maven-plugin.version}</version>
+                <configuration>
+                    <licenseSets>
+                        <licenseSet>
+                            <excludes>
+                                <exclude>*/**</exclude>
+                            </excludes>
+                        </licenseSet>
+                    </licenseSets>
+                </configuration>
+            </plugin>
+			<plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>properties-maven-plugin</artifactId>
-                <version>${properties-maven-plugin.version}</version>
+                <version>${maven-plugin-properties.version}</version>
                 <executions>
                     <execution>
                         <phase>initialize</phase>
@@ -160,7 +164,12 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin>            
+            
+            
+            
+            
+            
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
@@ -181,60 +190,12 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>com.mycila</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <version>2.11</version>
-                <configuration>
-                    <header>com/mycila/maven/plugin/license/templates/APACHE-2.txt</header>
-                    <properties>
-                        <owner>The Gravitee team</owner>
-                        <email>http://gravitee.io</email>
-                    </properties>
-                    <excludes>
-                        <exclude>LICENSE.txt</exclude>
-                        <exclude>Jenkinsfile</exclude>
-                        <exclude>**/README</exclude>
-                        <exclude>src/main/packaging/**</exclude>
-                        <exclude>src/test/resources/**</exclude>
-                        <exclude>src/main/resources/**</exclude>
-                        <exclude>src/main/java/org/tomitribe/**</exclude>
-                        <exclude>src/main/webapp/**</exclude>
-                        <exclude>node_modules/**</exclude>
-                        <exclude>dist/**</exclude>
-                        <exclude>.tmp/**</exclude>
-                        <exclude>bower_components/**</exclude>
-                        <exclude>.*</exclude>
-                        <exclude>.*/**</exclude>
-                        <exclude>**/*.adoc</exclude>
-                    </excludes>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                        <phase>validate</phase>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
+             <plugin>
                 <groupId>com.hubspot.maven.plugins</groupId>
                 <artifactId>prettier-maven-plugin</artifactId>
-                <version>0.17</version>
-                <configuration>
-                    <nodeVersion>12.13.0</nodeVersion>
-                    <prettierJavaVersion>1.6.1</prettierJavaVersion>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
+            
+
         </plugins>
     </build>
 

@@ -34,7 +34,12 @@ public class SchemeTypeConfiguration {
         return enabled;
     }
 
-    // List of additional headers to add to the Webhook signature creation
+    public SchemeTypeConfiguration setEnabled(boolean enabled) {
+        this.enabled = enabled;
+        return this;
+    }
+
+    // Optional - List of additional headers to add to the Webhook signature creation
     private List<String> headers = new ArrayList<>();
 
     public List<String> getHeaders() {
