@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.policy.webook_signature_validator;
+package io.gravitee.policy.webhook_signature_validator;
 
 import io.gravitee.gateway.api.ExecutionContext;
 import io.gravitee.gateway.api.Request;
@@ -27,8 +27,8 @@ import io.gravitee.policy.api.PolicyChain;
 import io.gravitee.policy.api.PolicyResult;
 import io.gravitee.policy.api.annotations.OnRequest;
 import io.gravitee.policy.api.annotations.OnRequestContent;
-import io.gravitee.policy.webook_signature_validator.configuration.SchemeTypeConfiguration;
-import io.gravitee.policy.webook_signature_validator.configuration.WebhookSignatureValidatorPolicyConfiguration;
+import io.gravitee.policy.webhook_signature_validator.configuration.SchemeTypeConfiguration;
+import io.gravitee.policy.webhook_signature_validator.configuration.WebhookSignatureValidatorPolicyConfiguration;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
