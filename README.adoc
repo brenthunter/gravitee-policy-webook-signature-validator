@@ -1,10 +1,10 @@
 = Webhook Signature Validator Policy
 
 ifdef::env-github[]
-image:https://img.shields.io/static/v1?label=Available%20at&message=Gravitee.io&color=1EC9D2["Gravitee.io", link="https://download.gravitee.io/#graviteeio-apim/plugins/policies/gravitee-policy-webook-signature-validator/"]
-image:https://img.shields.io/badge/License-Apache%202.0-blue.svg["License", link="https://github.com/gravitee-io/gravitee-policy-webook-signature-validator/blob/master/LICENSE.txt"]
-image:https://img.shields.io/badge/semantic--release-conventional%20commits-e10079?logo=semantic-release["Releases", link="https://github.com/gravitee-io/gravitee-policy-webook-signature-validator/releases"]
-image:https://circleci.com/gh/gravitee-io/webhook-logo.svg?style=svg["CircleCI", link="https://circleci.com/gh/gravitee-io/gravitee-policy-webook-signature-validator"]
+image:https://img.shields.io/static/v1?label=Available%20at&message=Gravitee.io&color=1EC9D2["Gravitee.io", link="https://download.gravitee.io/#graviteeio-apim/plugins/policies/gravitee-policy-webhook-signature-validator/"]
+image:https://img.shields.io/badge/License-Apache%202.0-blue.svg["License", link="https://github.com/gravitee-io/gravitee-policy-webhook-signature-validator/blob/master/LICENSE.txt"]
+image:https://img.shields.io/badge/semantic--release-conventional%20commits-e10079?logo=semantic-release["Releases", link="https://github.com/gravitee-io/gravitee-policy-webhook-signature-validator/releases"]
+image:https://circleci.com/gh/gravitee-io/webhook-logo.svg?style=svg["CircleCI", link="https://circleci.com/gh/gravitee-io/gravitee-policy-webhook-signature-validator"]
 endif::[]
 
 == Phase
@@ -62,10 +62,10 @@ The "Signature" is based on the model that the sender must authenticate itself w
 
 
 [source, json]
-.Webook Signature Validator Policy example:
+.Webhook Signature Validator Policy example:
 ----
 {
-  "policy": "webook-signature-validator",
+  "policy": "webhook-signature-validator",
   "configuration": {
 	"schemeType": {
 	  "headers": [
