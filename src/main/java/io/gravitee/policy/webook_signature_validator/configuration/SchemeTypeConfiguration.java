@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.policy.webook_signature_validator.configuration;
+package io.gravitee.policy.webhook_signature_validator.configuration;
 
 import java.util.ArrayList;
 import java.util.List;

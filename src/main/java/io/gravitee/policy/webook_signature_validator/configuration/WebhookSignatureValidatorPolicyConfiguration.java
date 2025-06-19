@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.policy.webook_signature_validator.configuration;
+package io.gravitee.policy.webhook_signature_validator.configuration;
 
 //import io.gravitee.plugin.annotation.ConfigurationEvaluator;
 import io.gravitee.policy.api.PolicyConfiguration;
